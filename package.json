@@ -1,0 +1,25 @@
+{
+  "name": "basics",
+  "version": "1.0.0",
+  "description": "learning vuejs basics",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard"
+  },
+  "author": "josesan",
+  "license": "MIT",
+  "dependencies": {
+    "browser-sync": "^2.23.6",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^3.1.0",
+    "vue": "^2.5.13",
+    "webpack": "^3.10.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "standard": "^10.0.3",
+    "webpack-stream": "^4.0.0"
+  }
+}
