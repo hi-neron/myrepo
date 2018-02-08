@@ -289,48 +289,8 @@ process.umask = function() { return 0; };
 
 var Vue = __webpack_require__(3);
 
-Vue.component('game-header', {
-  template: '<h1>Video Games</h1>'
-});
-
-Vue.component('game-add', {
-  template: '\n    <div>\n      <input type="text" v-model="titleGame" />\n      <button @click="emitNewGame">A\xF1adir</button>\n    </div>\n  ',
-  data: function data() {
-    return {
-      titleGame: null
-    };
-  },
-  methods: {
-    emitNewGame: function emitNewGame() {
-      if (this.titleGame) {
-        this.$emit('new', { title: this.titleGame });
-        this.titleGame = null;
-      }
-    }
-  }
-});
-
-Vue.component('game-list', {
-  props: ['games'],
-  template: '\n    <ol>\n      <game-item v-for="item in games" :game="item" :key="item.id"></game-item>\n    </ol>\n  '
-});
-
-Vue.component('game-item', {
-  props: ['game'],
-  template: '<li>{{ game.title }}</li>'
-});
-
 new Vue({
-  el: '#app',
-  template: '\n    <div class="view">\n      <game-header></game-header>\n      <game-add @new="addNewGame"></game-add>\n      <game-list v-bind:games="games"></game-list>\n    </div>\n  ',
-  data: {
-    games: [{ title: 'me: andromeda' }, { title: 'fifa 2017' }, { title: 'lol' }]
-  },
-  methods: {
-    addNewGame: function addNewGame(game) {
-      this.games.push(game);
-    }
-  }
+  el: '#app'
 });
 
 /***/ }),
