@@ -11,13 +11,11 @@ const THREE = require('three')
 console.log(dat)
 
 function init() {
-  let control
   const scene = new THREE.Scene()
   const renderer = new THREE.WebGLRenderer()
   const stats = createStats()
-  const sombre = new THREE.Color(0x000000)
-  const claire = new THREE.Color(0xfcfcfc)
-  var myColor = new THREE.Color(0xffff23)
+
+  let control
 
   document.body.appendChild(stats.domElement)
 
@@ -32,113 +30,42 @@ function init() {
   camera.position.z = 13
   camera.lookAt(scene.position)
 
-  let q = 8;
-
   document.body.appendChild(renderer.domElement)
-  
-  let mySpotLight = createSpotLight(0xFFdFFF)
-  let myCube = createCube()
 
-  let mySphere =  createSphere()
-
-  let pivotPoint = new THREE.Object3D()
-
-  
-  scene.add(mySpotLight)
-  scene.add(myCube)
-  scene.add(mySphere)
-
-  scene.add(pivotPoint)
-  pivotPoint.add(myCube)
-  
-  myCube.rotation.x = 0.1 * Math.PI
-
+  var mergedGeometry = new THREE.Geometry()
   control = new function () {
-    this.rotationSpeedX = 0.005
-    this.rotationSpeedY = 0.005
-    this.scale = 1
-    this.rotationWorld = 0.005
-    this.color = myColor
+    this.numberToAdd = 8000
   }
+
+  for(var i = 0; i < control.numberToAdd; i++) {
+    var cubeGeometry = new THREE.BoxGeometry(4 * Math.random, 4 * Math.random, 4 * Math.random)
+    var translation = new THREE.Matrix4().makeTranslation(
+      100*Math.random() - 50,
+      0, 100*Math.random() - 50
+    )
+    cubeGeometry.applyMatrix(translation)
+    mergedGeometry.merge(cubeGeometry)
+  }
+
+  var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshNormalMaterial({
+    opacity: 0.5,
+    transparent: true
+  }))
+
+  scene.add(mesh)
 
   addControls(control)
   render()
 
   function addControls (controlObject) {
     let gui = new dat.GUI();
-    let palette = {
-      color: '#ff00ff'
-    }
-    gui.add(controlObject, 'rotationSpeedX', -0.1, 1)
-    gui.add(controlObject, 'rotationSpeedY', -0.1, 1)
-    gui.add(controlObject, 'rotationWorld', -0.1, 1)
-    gui.add(controlObject, 'scale', 0.01, 2)
-    gui.addColor(controlObject, 'color')
+    gui.add(controlObject, 'numberToAdd', -0.1, 40)
   }
 
   function render () {
     renderer.render(scene, camera)
     stats.update()
-    pivotPoint.rotation.x += control.rotationSpeedX
-    pivotPoint.rotation.y += control.rotationSpeedY
-    mySphere.rotation.z += control.rotationWorld
-    myCube.scale.set(control.scale, control.scale, control.scale)
-    myColor = new THREE.Color(`rgb(${Math.round(Math.random()*control.color.r)}, ${Math.round(Math.random()*control.color.g)}, ${Math.round(Math.random()*control.color.g)})`)
-    // myColor = new THREE.Color(`rgb(${Math.round(control.color.r)}, ${Math.round(control.color.g)}, ${Math.round(control.color.b)})`)
-    myCube.material.color = myColor
     requestAnimationFrame(render)
-  }
-
-  function createCube () {
-    const geometry = new THREE.BoxGeometry(
-      1,
-      1,
-      1
-    )
-    const material = new THREE.MeshNormalMaterial()
-    const cube = new THREE.Mesh(geometry, material)
-    cube.position.set(1, 5, 1)
-    cube.castShadow = true
-
-    return cube
-  }
-
-  function createSpotLight (color) {
-    const spotLight = new THREE.SpotLight(color)
-    spotLight.position.set(10, 50, -35)
-    spotLight.castShadow = true
-    spotLight.shadowMapWidth = 512 * q; // default is 512
-    spotLight.shadowMapHeight = 512 * q; // default is 512
-
-    return spotLight
-  }
-
-  function createSphere () {
-    // geometry
-    let geometry = new THREE.SphereGeometry(3, 10, 10)
-    // material
-    let material = new THREE.MeshNormalMaterial({
-      wireframe: true
-    })
-
-    let sphere = new THREE.Mesh(geometry, material)
-    sphere.castShadow = true
-    sphere.receiveShadow = true
-    return sphere
-  }
-
-  function createPlane () {
-    const geometry = new THREE.PlaneGeometry(20, 20)
-    const material = new THREE.MeshLambertMaterial({
-      color: 0xcccccc
-    })
-    const plane = new THREE.Mesh(geometry, material)
-    plane.receiveShadow = true
-
-    plane.rotation.x = -0.5 * Math.PI
-    plane.position.y = -2
-
-    return plane
   }
 }
 
