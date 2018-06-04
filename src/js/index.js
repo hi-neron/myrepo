@@ -5,6 +5,7 @@ import { Ship, Bullet } from "./objects/ship"
 import { Enemmies } from "./objects/ennemies"
 
 var renderer, scene, camera, stars, ship, mx
+var bullets = []
 
 function rnd(max, min = 0) {
   return Math.random() * (max - min) + min
@@ -61,9 +62,24 @@ document.addEventListener('mousemove', (e) => {
   mx = e.clientX
 })
 
+document.addEventListener('click', (e) => {
+  let position = ship.getPosition()
+  let bullet = new Bullet(position)
+  scene.add(bullet.body)
+  bullets.push(bullet)
+})
+
 function animate () {
   renderer.render(scene, camera)
-  ship.animation(mx)
+  ship.plane(mx)
+  // console.log(bullets)
+
+  if (bullets.length > 0) {
+    for(let i = 0; i < bullets.length - 1; i++) {
+      bullets[i].forward()
+    }
+  }
+
   return requestAnimationFrame(animate)
 }
 

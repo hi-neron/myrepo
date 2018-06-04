@@ -47054,6 +47054,7 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var renderer, scene, camera, stars, ship, mx;
+var bullets = [];
 
 function rnd(max) {
   var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -47117,9 +47118,24 @@ document.addEventListener('mousemove', function (e) {
   mx = e.clientX;
 });
 
+document.addEventListener('click', function (e) {
+  var position = ship.getPosition();
+  var bullet = new _ship.Bullet(position);
+  scene.add(bullet.body);
+  bullets.push(bullet);
+});
+
 function animate() {
   renderer.render(scene, camera);
-  ship.animation(mx);
+  ship.plane(mx);
+  // console.log(bullets)
+
+  if (bullets.length > 0) {
+    for (var i = 0; i < bullets.length - 1; i++) {
+      bullets[i].forward();
+    }
+  }
+
   return requestAnimationFrame(animate);
 }
 
@@ -48576,33 +48592,64 @@ var Ship = function () {
   function Ship() {
     _classCallCheck(this, Ship);
 
-    var vehicleGeometry = new THREE.BoxGeometry(12, 20, 5);
+    var boxWidth = 12;
+    this.startPosition = boxWidth / 2;
+    var vehicleGeometry = new THREE.BoxGeometry(boxWidth, 20, 5);
     var vehicleMaterial = new THREE.MeshNormalMaterial();
     var body = new THREE.Mesh(vehicleGeometry, vehicleMaterial);
     this.vehicle = new THREE.Group();
-    this.vehicle.position.set(0, 1000, 0);
+    this.vehicle.position.set(this.startPosition, 1000, 0);
     this.vehicle.add(body);
+
+    //balas
+    this.bullets = [];
   }
 
   _createClass(Ship, [{
-    key: "animation",
-    value: function animation(mx) {
+    key: "plane",
+    value: function plane(mx) {
       var width = window.innerWidth;
+      var scale = width / 2;
+      var distance = mx - scale + this.startPosition;
+      var max = scale / 2 - 60;
+      var limited = distance * max / scale;
+      this.limitedMove = limited;
       mx = mx | 0;
-      var distance = mx - width / 2;
-      var max = 200;
-
-      console.log(distance);
-      this.vehicle.position.set(distance, -120, 0);
+      this.vehicle.position.set(limited, -120, 0);
+    }
+  }, {
+    key: "getPosition",
+    value: function getPosition() {
+      var x = this.limitedMove;
+      return x;
     }
   }]);
 
   return Ship;
 }();
 
-var Bullet = function Bullet() {
-  _classCallCheck(this, Bullet);
-};
+var Bullet = function () {
+  function Bullet(position) {
+    _classCallCheck(this, Bullet);
+
+    this.position = position;
+    this.color = 0x0;
+    var geometry = new THREE.SphereGeometry(5, 2);
+    var material = new THREE.MeshBasicMaterial({ color: this.color });
+
+    this.body = new THREE.Mesh(geometry, material);
+    this.body.position.set(this.position, -120, 0);
+  }
+
+  _createClass(Bullet, [{
+    key: "forward",
+    value: function forward() {
+      this.body.translateY(1);
+    }
+  }]);
+
+  return Bullet;
+}();
 
 exports.Ship = Ship;
 exports.Bullet = Bullet;
