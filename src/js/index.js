@@ -1,74 +1,15 @@
 'use strict'
 import * as THREE from "three"
 import yo from "yo-yo"
-import { Cube } from "./objects/cube"
+import { Ship, Bullet } from "./objects/ship"
+import { Enemmies } from "./objects/ennemies"
 
-var renderer, scene, camera, stars
+var renderer, scene, camera, stars, ship, mx
 
 function rnd(max, min = 0) {
   return Math.random() * (max - min) + min
 }
 
-class Star {
-  constructor (max) {
-    // width = window.innerWidth
-    // height = window.innerHeight
-
-    this.max = max
-    this.x = rnd(max) - max / 2
-    this.y = rnd(max) - max / 2
-    this.z = -100
-
-    
-    this.history = []
-    
-    this.size = rnd(3.9)
-    this.speed = 4 - this.size
-    this.historySize = Math.floor(this.speed * 10)
-
-    let geometry = new THREE.DodecahedronGeometry(this.size, 1)
-    let material = new THREE.MeshBasicMaterial({
-      color: 0x0
-    })
-
-    this.star = new THREE.Group()
-
-    let d = 1 / this.historySize
-    let opacity = 1 - d
-    
-    for (let i = 0; i < this.historySize; i++) {
-      let materialS = new THREE.MeshLambertMaterial({
-        color: 0x0
-      })
-
-      let shadowH = new THREE.Mesh(geometry, materialS)
-      shadowH.geometry.translate(.01, 0, 0)
-      shadowH.position.set(this.x, this.y, this.z - i * this.speed)
-      this.history.push(shadowH)
-      this.star.add(shadowH)
-    }
-
-    this.main = new THREE.Mesh(geometry, material)
-    this.star.add(this.main)
-
-    this.star.position.set(this.x, this.y, this.z)
-  }
-  
-  update () {
-    this.z += this.speed
-    this.star.position.set(this.x, this.y, this.z)
-
-    for (let i = 0; i < this.history.length; i++) {
-      this.history[i].rotateZ((i * 0.01))
-    }
-
-    if(this.z > 800) {
-      this.z = -100
-      this.x = rnd(this.max) - this.max / 2
-      this.y = rnd(this.max) - this.max / 2
-    }
-  }
-}
 
 class World {
   constructor () {
@@ -86,7 +27,6 @@ class World {
     renderer = new THREE.WebGLRenderer({alpha: true, antialias:true})
     renderer.setPixelRatio( window.devicePixelRatio)
     
-    // change background COlor
     renderer.setClearColor(this.initBackColor, 0)
     this.conf ()
 
@@ -95,30 +35,21 @@ class World {
     
     renderer.setSize(this.width, this.height)
 
-    this.initStarField()
+    // create a ship
+    this.createShip()
+    // create array with ennemies
     
     this.animation = this.startAnimation()
   }
 
-  initStarField() {
-    let quantity = 200
-    let size = 100
-    stars = []
-
-    for( let i = 0; i < quantity; i++) {
-      let one = new Star(size)
-      scene.add(one.star)
-      stars.push(one)
-    }
-  }
-
   conf () {
     camera.position.set( 0, 0, 400 );
-    // camera.rotation.order = 'YXZ';
-    // camera.rotation.y = - Math.PI / 4;
-    // camera.rotation.x = Math.atan( - 1 / Math.sqrt( 2 ) );
-    scene.fog = new THREE.Fog(0xffffff, 0.0025, 370);
     camera.lookAt(0, 0, 0)
+  }
+
+  createShip () {
+    ship = new Ship()
+    scene.add(ship.vehicle)
   }
 
   startAnimation () {
@@ -126,11 +57,13 @@ class World {
   }
 } 
 
+document.addEventListener('mousemove', (e) => {
+  mx = e.clientX
+})
+
 function animate () {
   renderer.render(scene, camera)
-  stars.map((star) => {
-    star.update()
-  })
+  ship.animation(mx)
   return requestAnimationFrame(animate)
 }
 

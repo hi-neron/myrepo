@@ -60,238 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {var topLevel = typeof global !== 'undefined' ? global :
-    typeof window !== 'undefined' ? window : {}
-var minDoc = __webpack_require__(6);
-
-var doccy;
-
-if (typeof document !== 'undefined') {
-    doccy = document;
-} else {
-    doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
-
-    if (!doccy) {
-        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
-    }
-}
-
-module.exports = doccy;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _templateObject = _taggedTemplateLiteral(["\n    <div className=\"game\">\n    </div>\n    "], ["\n    <div className=\"game\">\n    </div>\n    "]);
-
-var _three = __webpack_require__(3);
-
-var THREE = _interopRequireWildcard(_three);
-
-var _yoYo = __webpack_require__(4);
-
-var _yoYo2 = _interopRequireDefault(_yoYo);
-
-var _cube = __webpack_require__(14);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var renderer, scene, camera, stars;
-
-function rnd(max) {
-  var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-  return Math.random() * (max - min) + min;
-}
-
-var Star = function () {
-  function Star(max) {
-    _classCallCheck(this, Star);
-
-    // width = window.innerWidth
-    // height = window.innerHeight
-
-    this.max = max;
-    this.x = rnd(max) - max / 2;
-    this.y = rnd(max) - max / 2;
-    this.z = -100;
-
-    this.history = [];
-
-    this.size = rnd(3.9);
-    this.speed = 4 - this.size;
-    this.historySize = Math.floor(this.speed * 10);
-
-    var geometry = new THREE.DodecahedronGeometry(this.size, 1);
-    var material = new THREE.MeshBasicMaterial({
-      color: 0x0
-    });
-
-    this.star = new THREE.Group();
-
-    var d = 1 / this.historySize;
-    var opacity = 1 - d;
-
-    for (var i = 0; i < this.historySize; i++) {
-      var materialS = new THREE.MeshLambertMaterial({
-        color: 0x0
-      });
-
-      var shadowH = new THREE.Mesh(geometry, materialS);
-      shadowH.geometry.translate(.01, 0, 0);
-      shadowH.position.set(this.x, this.y, this.z - i * this.speed);
-      this.history.push(shadowH);
-      this.star.add(shadowH);
-    }
-
-    this.main = new THREE.Mesh(geometry, material);
-    this.star.add(this.main);
-
-    this.star.position.set(this.x, this.y, this.z);
-  }
-
-  _createClass(Star, [{
-    key: "update",
-    value: function update() {
-      this.z += this.speed;
-      this.star.position.set(this.x, this.y, this.z);
-
-      for (var i = 0; i < this.history.length; i++) {
-        this.history[i].rotateZ(i * 0.01);
-      }
-
-      if (this.z > 800) {
-        this.z = -100;
-        this.x = rnd(this.max) - this.max / 2;
-        this.y = rnd(this.max) - this.max / 2;
-      }
-    }
-  }]);
-
-  return Star;
-}();
-
-var World = function () {
-  function World() {
-    _classCallCheck(this, World);
-
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
-    this.initBackColor = 0xffffff;
-
-    var container = (0, _yoYo2.default)(_templateObject);
-    // main conf
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-
-    // change background COlor
-    renderer.setClearColor(this.initBackColor, 0);
-    this.conf();
-
-    container.appendChild(renderer.domElement);
-    document.body.appendChild(container);
-
-    renderer.setSize(this.width, this.height);
-
-    this.initStarField();
-
-    this.animation = this.startAnimation();
-  }
-
-  _createClass(World, [{
-    key: "initStarField",
-    value: function initStarField() {
-      var quantity = 200;
-      var size = 100;
-      stars = [];
-
-      for (var i = 0; i < quantity; i++) {
-        var one = new Star(size);
-        scene.add(one.star);
-        stars.push(one);
-      }
-    }
-  }, {
-    key: "conf",
-    value: function conf() {
-      camera.position.set(0, 0, 400);
-      // camera.rotation.order = 'YXZ';
-      // camera.rotation.y = - Math.PI / 4;
-      // camera.rotation.x = Math.atan( - 1 / Math.sqrt( 2 ) );
-      scene.fog = new THREE.Fog(0xffffff, 0.0025, 370);
-      camera.lookAt(0, 0, 0);
-    }
-  }, {
-    key: "startAnimation",
-    value: function startAnimation() {
-      this.animation = animate();
-    }
-  }]);
-
-  return World;
-}();
-
-function animate() {
-  renderer.render(scene, camera);
-  stars.map(function (star) {
-    star.update();
-  });
-  return requestAnimationFrame(animate);
-}
-
-var myWorld = new World(true);
-
-/***/ }),
-/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47199,6 +46972,160 @@ function LensFlare() {
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {var topLevel = typeof global !== 'undefined' ? global :
+    typeof window !== 'undefined' ? window : {}
+var minDoc = __webpack_require__(6);
+
+var doccy;
+
+if (typeof document !== 'undefined') {
+    doccy = document;
+} else {
+    doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
+
+    if (!doccy) {
+        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
+    }
+}
+
+module.exports = doccy;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n    <div className=\"game\">\n    </div>\n    "], ["\n    <div className=\"game\">\n    </div>\n    "]);
+
+var _three = __webpack_require__(0);
+
+var THREE = _interopRequireWildcard(_three);
+
+var _yoYo = __webpack_require__(4);
+
+var _yoYo2 = _interopRequireDefault(_yoYo);
+
+var _ship = __webpack_require__(14);
+
+var _ennemies = __webpack_require__(15);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var renderer, scene, camera, stars, ship, mx;
+
+function rnd(max) {
+  var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+  return Math.random() * (max - min) + min;
+}
+
+var World = function () {
+  function World() {
+    _classCallCheck(this, World);
+
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+    this.initBackColor = 0xffffff;
+
+    var container = (0, _yoYo2.default)(_templateObject);
+    // main conf
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    renderer.setClearColor(this.initBackColor, 0);
+    this.conf();
+
+    container.appendChild(renderer.domElement);
+    document.body.appendChild(container);
+
+    renderer.setSize(this.width, this.height);
+
+    // create a ship
+    this.createShip();
+    // create array with ennemies
+
+    this.animation = this.startAnimation();
+  }
+
+  _createClass(World, [{
+    key: "conf",
+    value: function conf() {
+      camera.position.set(0, 0, 400);
+      camera.lookAt(0, 0, 0);
+    }
+  }, {
+    key: "createShip",
+    value: function createShip() {
+      ship = new _ship.Ship();
+      scene.add(ship.vehicle);
+    }
+  }, {
+    key: "startAnimation",
+    value: function startAnimation() {
+      this.animation = animate();
+    }
+  }]);
+
+  return World;
+}();
+
+document.addEventListener('mousemove', function (e) {
+  mx = e.clientX;
+});
+
+function animate() {
+  renderer.render(scene, camera);
+  ship.animation(mx);
+  return requestAnimationFrame(animate);
+}
+
+var myWorld = new World(true);
+
+/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -47250,7 +47177,7 @@ module.exports.update = function (fromNode, toNode, opts) {
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var document = __webpack_require__(0)
+var document = __webpack_require__(1)
 var hyperx = __webpack_require__(7)
 var onload = __webpack_require__(9)
 
@@ -47741,7 +47668,7 @@ function attributeToProperty (h) {
 /***/ (function(module, exports, __webpack_require__) {
 
 /* global MutationObserver */
-var document = __webpack_require__(0)
+var document = __webpack_require__(1)
 var window = __webpack_require__(10)
 var assert = __webpack_require__(11)
 var watch = Object.create(null)
@@ -47862,7 +47789,7 @@ if (typeof window !== "undefined") {
 
 module.exports = win;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
 /* 11 */
@@ -48633,14 +48560,59 @@ module.exports = [
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.Bullet = exports.Ship = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _three = __webpack_require__(0);
+
+var THREE = _interopRequireWildcard(_three);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Cube = function Cube() {
-  _classCallCheck(this, Cube);
+var Ship = function () {
+  function Ship() {
+    _classCallCheck(this, Ship);
+
+    var vehicleGeometry = new THREE.BoxGeometry(12, 20, 5);
+    var vehicleMaterial = new THREE.MeshNormalMaterial();
+    var body = new THREE.Mesh(vehicleGeometry, vehicleMaterial);
+    this.vehicle = new THREE.Group();
+    this.vehicle.position.set(0, 1000, 0);
+    this.vehicle.add(body);
+  }
+
+  _createClass(Ship, [{
+    key: "animation",
+    value: function animation(mx) {
+      var width = window.innerWidth;
+      mx = mx | 0;
+      var distance = mx - width / 2;
+      var max = 200;
+
+      console.log(distance);
+      this.vehicle.position.set(distance, -120, 0);
+    }
+  }]);
+
+  return Ship;
+}();
+
+var Bullet = function Bullet() {
+  _classCallCheck(this, Bullet);
 };
 
-exports.Cube = Cube;
+exports.Ship = Ship;
+exports.Bullet = Bullet;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /***/ })
 /******/ ]);
