@@ -5,7 +5,9 @@ class Ship {
     let boxWidth = 12
     this.startPosition = boxWidth / 2
     let vehicleGeometry = new THREE.BoxGeometry(boxWidth, 20, 5)
-    let vehicleMaterial = new THREE.MeshNormalMaterial()
+    let vehicleMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff45b0
+    })
     let body = new THREE.Mesh( vehicleGeometry, vehicleMaterial)
     this.vehicle = new THREE.Group()
     this.vehicle.position.set(this.startPosition, 1000, 0)
@@ -36,7 +38,7 @@ class Bullet {
   constructor (position) {
     this.position = position
     this.color = 0x0
-    let geometry = new THREE.SphereGeometry(5, 2)
+    let geometry = new THREE.BoxGeometry(5, 5, 3)
     let material = new THREE.MeshBasicMaterial(
       {color: this.color}
     )
@@ -46,7 +48,10 @@ class Bullet {
   }
 
   forward () {
-    this.body.translateY(1)
+    this.body.translateY(4)
+  }
+
+  detectCollision() {
   }
 }
 

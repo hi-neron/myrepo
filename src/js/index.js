@@ -2,10 +2,18 @@
 import * as THREE from "three"
 import yo from "yo-yo"
 import { Ship, Bullet } from "./objects/ship"
-import { Enemmies } from "./objects/ennemies"
+import { Enemmies, Army } from "./objects/ennemies"
 
-var renderer, scene, camera, stars, ship, mx
-var bullets = []
+// World
+var renderer, scene, camera
+// stars and ship
+var stars, ship, mx
+// bullets
+var bulletSpace = 0
+var maxBulletBag = 10
+var bulletBag = new Array(maxBulletBag)
+// Enemies
+var ennemies
 
 function rnd(max, min = 0) {
   return Math.random() * (max - min) + min
@@ -39,6 +47,10 @@ class World {
     // create a ship
     this.createShip()
     // create array with ennemies
+
+    setTimeout(() => {
+      this.createEnemmies()
+    }, 500);
     
     this.animation = this.startAnimation()
   }
@@ -46,6 +58,14 @@ class World {
   conf () {
     camera.position.set( 0, 0, 400 );
     camera.lookAt(0, 0, 0)
+  }
+
+  createEnemmies () {
+    // un grupo de enemigos
+    // se mueven en conjunto
+    // cuadricula x * x
+    ennemies = new Army()
+    scene.add(ennemies.army)
   }
 
   createShip () {
@@ -62,11 +82,19 @@ document.addEventListener('mousemove', (e) => {
   mx = e.clientX
 })
 
-document.addEventListener('click', (e) => {
+
+document.addEventListener('keyup', (e) => {
+  if (e.code != "Space") return
+  bulletSpace = bulletSpace > maxBulletBag - 1 ? 0: bulletSpace
   let position = ship.getPosition()
   let bullet = new Bullet(position)
   scene.add(bullet.body)
-  bullets.push(bullet)
+
+  if (bulletBag[bulletSpace]) {
+    scene.remove(bulletBag[bulletSpace].body)
+  }
+  bulletBag[bulletSpace] = bullet
+  bulletSpace += 1
 })
 
 function animate () {
@@ -74,9 +102,12 @@ function animate () {
   ship.plane(mx)
   // console.log(bullets)
 
-  if (bullets.length > 0) {
-    for(let i = 0; i < bullets.length - 1; i++) {
-      bullets[i].forward()
+  if (bulletBag.length > 0) {
+    for(let i = 0; i < bulletBag.length; i++) {
+      if (bulletBag[i]) {
+        bulletBag[i].forward()
+        bulletBag[i].detectCollision()
+      }
     }
   }
 

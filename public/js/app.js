@@ -47053,8 +47053,16 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var renderer, scene, camera, stars, ship, mx;
-var bullets = [];
+// World
+var renderer, scene, camera;
+// stars and ship
+var stars, ship, mx;
+// bullets
+var bulletSpace = 0;
+var maxBulletBag = 10;
+var bulletBag = new Array(maxBulletBag);
+// Enemies
+var ennemies;
 
 function rnd(max) {
   var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -47064,6 +47072,8 @@ function rnd(max) {
 
 var World = function () {
   function World() {
+    var _this = this;
+
     _classCallCheck(this, World);
 
     this.width = window.innerWidth;
@@ -47089,6 +47099,10 @@ var World = function () {
     this.createShip();
     // create array with ennemies
 
+    setTimeout(function () {
+      _this.createEnemmies();
+    }, 500);
+
     this.animation = this.startAnimation();
   }
 
@@ -47097,6 +47111,15 @@ var World = function () {
     value: function conf() {
       camera.position.set(0, 0, 400);
       camera.lookAt(0, 0, 0);
+    }
+  }, {
+    key: "createEnemmies",
+    value: function createEnemmies() {
+      // un grupo de enemigos
+      // se mueven en conjunto
+      // cuadricula x * x
+      ennemies = new _ennemies.Army();
+      scene.add(ennemies.army);
     }
   }, {
     key: "createShip",
@@ -47118,11 +47141,18 @@ document.addEventListener('mousemove', function (e) {
   mx = e.clientX;
 });
 
-document.addEventListener('click', function (e) {
+document.addEventListener('keyup', function (e) {
+  if (e.code != "Space") return;
+  bulletSpace = bulletSpace > maxBulletBag - 1 ? 0 : bulletSpace;
   var position = ship.getPosition();
   var bullet = new _ship.Bullet(position);
   scene.add(bullet.body);
-  bullets.push(bullet);
+
+  if (bulletBag[bulletSpace]) {
+    scene.remove(bulletBag[bulletSpace].body);
+  }
+  bulletBag[bulletSpace] = bullet;
+  bulletSpace += 1;
 });
 
 function animate() {
@@ -47130,9 +47160,12 @@ function animate() {
   ship.plane(mx);
   // console.log(bullets)
 
-  if (bullets.length > 0) {
-    for (var i = 0; i < bullets.length - 1; i++) {
-      bullets[i].forward();
+  if (bulletBag.length > 0) {
+    for (var i = 0; i < bulletBag.length; i++) {
+      if (bulletBag[i]) {
+        bulletBag[i].forward();
+        bulletBag[i].detectCollision();
+      }
     }
   }
 
@@ -48595,7 +48628,9 @@ var Ship = function () {
     var boxWidth = 12;
     this.startPosition = boxWidth / 2;
     var vehicleGeometry = new THREE.BoxGeometry(boxWidth, 20, 5);
-    var vehicleMaterial = new THREE.MeshNormalMaterial();
+    var vehicleMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff45b0
+    });
     var body = new THREE.Mesh(vehicleGeometry, vehicleMaterial);
     this.vehicle = new THREE.Group();
     this.vehicle.position.set(this.startPosition, 1000, 0);
@@ -48634,7 +48669,7 @@ var Bullet = function () {
 
     this.position = position;
     this.color = 0x0;
-    var geometry = new THREE.SphereGeometry(5, 2);
+    var geometry = new THREE.BoxGeometry(5, 5, 3);
     var material = new THREE.MeshBasicMaterial({ color: this.color });
 
     this.body = new THREE.Mesh(geometry, material);
@@ -48644,8 +48679,11 @@ var Bullet = function () {
   _createClass(Bullet, [{
     key: "forward",
     value: function forward() {
-      this.body.translateY(1);
+      this.body.translateY(4);
     }
+  }, {
+    key: "detectCollision",
+    value: function detectCollision() {}
   }]);
 
   return Bullet;
@@ -48660,6 +48698,68 @@ exports.Bullet = Bullet;
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Army = exports.Enemmies = undefined;
+
+var _three = __webpack_require__(0);
+
+var THREE = _interopRequireWildcard(_three);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Army = function Army(type) {
+  _classCallCheck(this, Army);
+
+  this.type = type | 'normal';
+  this.ennemiesQuantity = 20;
+
+  // to set ennmies grid
+  this.ennemiesWidth = 25;
+  var cols = 8;
+  var rows = Math.ceil(this.ennemiesQuantity / cols);
+  var modul = this.ennemiesQuantity % cols;
+
+  this.armyW = this.ennemiesWidth * cols - this.ennemiesWidth;
+
+  //Ennemies Container
+  this.enemmiesBag = [];
+
+  this.army = new THREE.Group();
+
+  console.log(this.armyW);
+
+  this.army.position.set(-1 * this.armyW, 10, 0);
+
+  for (var y = 0; y < rows; y++) {
+    var ll = y === rows - 1 ? modul : 0;
+    for (var x = 0; x < cols - ll; x++) {
+      console.log('hi');
+      var singleEnemmie = new Enemmies(this.ennemiesWidth);
+      var size = singleEnemmie.size;
+      singleEnemmie.body.position.set(x * size.w * 2, y * size.h * 2, 0);
+      this.army.add(singleEnemmie.body);
+    }
+  }
+};
+
+var Enemmies = function Enemmies(ennemiesWidth) {
+  _classCallCheck(this, Enemmies);
+
+  this.size = { w: ennemiesWidth, h: 14 };
+  var geometry = new THREE.CubeGeometry(this.size.w, this.size.h, 4);
+  var material = new THREE.MeshBasicMaterial({
+    color: 0x3498fc
+  });
+  this.body = new THREE.Mesh(geometry, material);
+};
+
+exports.Enemmies = Enemmies;
+exports.Army = Army;
 
 /***/ })
 /******/ ]);
